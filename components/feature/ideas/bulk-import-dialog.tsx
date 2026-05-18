@@ -146,7 +146,7 @@ export function BulkImportDialog({
         onOpenChange(v);
       }}
     >
-      <DialogContent className="max-w-3xl">
+      <DialogContent className="max-w-6xl">
         <DialogHeader>
           <DialogTitle>Importar ideias em lote</DialogTitle>
           <DialogDescription>
@@ -230,14 +230,14 @@ export function BulkImportDialog({
                   Voltar para edição
                 </Button>
               </div>
-              <div className="max-h-80 overflow-auto border rounded-md">
+              <div className="max-h-96 overflow-auto border rounded-md">
                 <Table>
                   <THead>
                     <TR>
-                      <TH className="w-12">#</TH>
-                      <TH>Título</TH>
-                      <TH className="w-64">Briefing</TH>
-                      <TH className="w-40">Keywords</TH>
+                      <TH className="w-10">#</TH>
+                      <TH className="min-w-[320px]">Título</TH>
+                      <TH className="min-w-[280px]">Briefing</TH>
+                      <TH className="min-w-[200px]">Keywords</TH>
                       <TH className="w-10"></TH>
                     </TR>
                   </THead>
