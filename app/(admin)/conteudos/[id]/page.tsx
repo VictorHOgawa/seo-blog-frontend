@@ -23,7 +23,7 @@ import {
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ImagePlus, Save, Send, Sparkles } from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 type Tab = 'content' | 'seo' | 'media' | 'related' | 'history';
 
@@ -53,8 +53,19 @@ export default function ContentEditorPage() {
   });
   const [dirty, setDirty] = useState(false);
 
+  // Inicializa o form APENAS quando muda o id (nova rota) ou quando o
+  // conteúdo chega pela primeira vez. Refetches subsequentes do React Query
+  // não devem sobrescrever o form (caso contrário perdem o que o usuário
+  // digitou ou um campo regenerado em outra aba).
+  const initializedFor = useRef<string | null>(null);
   useEffect(() => {
-    if (content) {
+    if (!content) return;
+    if (initializedFor.current === content.id && !dirty) {
+      // mesmo content já carregado — só sincroniza campos que vieram do
+      // servidor (ex.: regerar TAGS atualiza content.tags) sem mexer no form
+      return;
+    }
+    if (initializedFor.current !== content.id) {
       setForm({
         title: content.title,
         slug: content.slug,
@@ -63,8 +74,9 @@ export default function ContentEditorPage() {
         metaDescription: content.metaDescription,
       });
       setDirty(false);
+      initializedFor.current = content.id;
     }
-  }, [content]);
+  }, [content, dirty]);
 
   const save = useMutation({
     mutationFn: () =>
