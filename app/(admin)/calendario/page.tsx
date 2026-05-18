@@ -229,11 +229,25 @@ export default function CalendarPage() {
                         variant="ghost"
                         size="sm"
                         onClick={() => {
+                          // Mostra default em horário LOCAL pra o usuário não
+                          // ficar confuso com UTC. Converte de volta para ISO.
+                          const d = new Date(j.scheduledFor);
+                          const pad = (n: number) => String(n).padStart(2, '0');
+                          const defaultLocal = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
                           const v = prompt(
-                            'Nova data/hora ISO (ex.: 2026-05-25T10:00):',
-                            j.scheduledFor.slice(0, 16),
+                            'Nova data/hora (horário local — ex.: 2026-05-25T10:00):',
+                            defaultLocal,
                           );
-                          if (v) reschedule.mutate({ id: j.id, scheduledFor: v });
+                          if (!v) return;
+                          const parsed = new Date(v);
+                          if (isNaN(parsed.getTime())) {
+                            alert('Data inválida.');
+                            return;
+                          }
+                          reschedule.mutate({
+                            id: j.id,
+                            scheduledFor: parsed.toISOString(),
+                          });
                         }}
                         disabled={j.status === 'SUCCEEDED'}
                       >

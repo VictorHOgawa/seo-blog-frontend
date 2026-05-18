@@ -218,8 +218,10 @@ function previewSchedule(o: {
   if (o.n === 0) return [];
   const [hh, mm] = o.time.split(':').map(Number);
   const out: Date[] = [];
-  let cur = new Date(o.startDate);
-  cur.setHours(hh || 0, mm || 0, 0, 0);
+  // Parse startDate como LOCAL (mesma lógica do backend).
+  // `new Date("2026-05-19")` é UTC midnight → vira dia anterior em UTC-3.
+  const [y, mo, d] = o.startDate.slice(0, 10).split('-').map(Number);
+  let cur = new Date(y, mo - 1, d, hh || 0, mm || 0, 0, 0);
   while (out.length < o.n) {
     if (o.skipWeekends) {
       while (cur.getDay() === 0 || cur.getDay() === 6) {
