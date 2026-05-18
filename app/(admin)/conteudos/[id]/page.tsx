@@ -95,11 +95,21 @@ export default function ContentEditorPage() {
   const transition = useMutation({
     mutationFn: (to: ContentStatus) =>
       api(`/contents/${params.id}/transition`, { method: 'POST', json: { to } }),
-    onSuccess: () => {
+    onSuccess: (_, to) => {
       queryClient.invalidateQueries({ queryKey: ['content', params.id] });
+      queryClient.invalidateQueries({ queryKey: ['content-versions', params.id] });
       queryClient.invalidateQueries({ queryKey: ['contents'] });
+      setStatusFeedback({ kind: 'ok', to: to as ContentStatus });
+      setTimeout(() => setStatusFeedback(null), 2500);
+    },
+    onError: (e: Error) => {
+      setStatusFeedback({ kind: 'err', message: e.message });
+      setTimeout(() => setStatusFeedback(null), 4000);
     },
   });
+  const [statusFeedback, setStatusFeedback] = useState<
+    { kind: 'ok'; to: ContentStatus } | { kind: 'err'; message: string } | null
+  >(null);
 
   const generateCover = useMutation({
     mutationFn: (prompt?: string) =>
@@ -109,6 +119,7 @@ export default function ContentEditorPage() {
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['content', params.id] });
+      queryClient.invalidateQueries({ queryKey: ['content-versions', params.id] });
       queryClient.invalidateQueries({ queryKey: ['ai-cost'] });
     },
     onError: (e: Error) => alert(e.message),
@@ -153,16 +164,29 @@ export default function ContentEditorPage() {
             <span>{content.locale}</span>
           </div>
         </div>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-2 items-center">
+          {statusFeedback?.kind === 'ok' && (
+            <span className="text-xs text-emerald-700 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-1 rounded">
+              ✓ Status → {CONTENT_STATUS_LABEL[statusFeedback.to]}
+            </span>
+          )}
+          {statusFeedback?.kind === 'err' && (
+            <span className="text-xs text-red-700 bg-red-50 dark:bg-red-950/40 px-2 py-1 rounded max-w-xs truncate">
+              ⚠ {statusFeedback.message}
+            </span>
+          )}
           <Select
-            className="w-40"
+            className="w-44"
             value=""
+            disabled={transition.isPending}
             onChange={(e) => {
               const v = e.target.value as ContentStatus;
               if (v) transition.mutate(v);
             }}
           >
-            <option value="">Mover status…</option>
+            <option value="">
+              {transition.isPending ? 'Mudando status…' : 'Mover status…'}
+            </option>
             {(Object.keys(CONTENT_STATUS_LABEL) as ContentStatus[]).map((s) => (
               <option key={s} value={s} disabled={s === content.status}>
                 → {CONTENT_STATUS_LABEL[s]}

@@ -25,6 +25,7 @@ export function RegenerateButton({ contentId, field, label, size = 'sm', onResul
       }),
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['content', contentId] });
+      queryClient.invalidateQueries({ queryKey: ['content-versions', contentId] });
       queryClient.invalidateQueries({ queryKey: ['contents'] });
       queryClient.invalidateQueries({ queryKey: ['ai-cost'] });
       onResult?.(data.value);
