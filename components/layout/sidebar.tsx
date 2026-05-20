@@ -2,6 +2,7 @@
 
 import { cn } from '@/lib/utils';
 import {
+  BarChart3,
   Calendar,
   CheckSquare,
   FileText,
@@ -25,6 +26,7 @@ interface NavItem {
 
 const items: NavItem[] = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+  { href: '/analytics', label: 'Analytics', icon: BarChart3 },
   { href: '/ideias', label: 'Ideias', icon: Lightbulb },
   { href: '/conteudos', label: 'Conteúdos', icon: FileText },
   { href: '/revisao', label: 'Revisão', icon: CheckSquare },
